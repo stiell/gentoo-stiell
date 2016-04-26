@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -7,7 +7,7 @@ EAPI="5"
 AUTOTOOLS_AUTORECONF="1"
 EGIT_REPO_URI="https://github.com/stiell/zfs.git"
 EGIT_BRANCH="grsec-compat"
-EGIT_COMMIT="7de443c2bdeee8e8d71eca629f8947758fcc7e8f"
+EGIT_COMMIT="25266c4c515f060391b3e234d2026917f780c509"
 inherit git-r3
 
 inherit flag-o-matic linux-info linux-mod toolchain-funcs autotools-utils
