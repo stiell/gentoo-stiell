@@ -37,11 +37,9 @@ AUTOTOOLS_IN_SOURCE_BUILD="1"
 DOCS=( AUTHORS COPYRIGHT DISCLAIMER README.markdown )
 
 pkg_setup() {
-	linux-info_pkg_setup
 	CONFIG_CHECK="!DEBUG_LOCK_ALLOC
 		EFI_PARTITION
 		IOSCHED_NOOP
-		MODULES
 		!PAX_KERNEXEC_PLUGIN_METHOD_OR
 		ZLIB_DEFLATE
 		ZLIB_INFLATE
@@ -64,7 +62,7 @@ pkg_setup() {
 	[ ${PV} != "9999" ] && \
 		{ kernel_is le 4 5 || die "Linux 4.5 is the latest supported version."; }
 
-	check_extra_config
+	linux-mod_pkg_setup
 }
 
 src_prepare() {
