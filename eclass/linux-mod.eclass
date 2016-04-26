@@ -591,7 +591,7 @@ linux-mod_pkg_setup() {
 	if use module-signing; then
 		CONFIG_CHECK="${CONFIG_CHECK} MODULE_SIG CRYPTO_SHA512"
 	else
-		CONFIG_CHECK="${CONFIG_CHECK} !CONFIG_MODULE_SIG_FORCE"
+		CONFIG_CHECK="${CONFIG_CHECK} !MODULE_SIG_FORCE"
 	fi
 	export CONFIG_CHECK
 
