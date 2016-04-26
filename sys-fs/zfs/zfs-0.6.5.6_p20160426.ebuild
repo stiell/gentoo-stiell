@@ -4,6 +4,7 @@
 
 EAPI="5"
 PYTHON_COMPAT=( python{2_7,3_3,3_4,3_5} )
+HAS_MODULES=
 
 inherit git-r3 linux-mod
 AUTOTOOLS_AUTORECONF="1"
