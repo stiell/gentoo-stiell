@@ -127,16 +127,23 @@
 # @DESCRIPTION:
 # It's a read-only variable. It contains the extension of the kernel modules.
 
+# @ECLASS-VARIABLE: HAS_MODULES
+# @DESCRIPTION:
+# If non-empty this variable enables adding USE flags and dependencies for building modules.
+# It is non-empty by default.
+
 inherit eutils linux-info multilib
 EXPORT_FUNCTIONS pkg_setup pkg_preinst pkg_postinst src_install src_compile pkg_postrm
 
-IUSE="module-signing kernel_linux ${MODULES_OPTIONAL_USE}"
+HAS_MODULES=${HAS_MODULES-y}
+
+IUSE="${HAS_MODULES:+module-signing }kernel_linux ${MODULES_OPTIONAL_USE}"
 SLOT="0"
 RDEPEND="${MODULES_OPTIONAL_USE}${MODULES_OPTIONAL_USE:+? (} kernel_linux? ( virtual/modutils ) ${MODULES_OPTIONAL_USE:+)}"
 DEPEND="${RDEPEND}
     ${MODULES_OPTIONAL_USE}${MODULES_OPTIONAL_USE:+? (} 
 	sys-apps/sed
-	module-signing? ( dev-libs/openssl )
+	${HAS_MODULES:+module-signing? ( dev-libs/openssl )}
 	kernel_linux? ( virtual/linux-sources )
 	${MODULES_OPTIONAL_USE:+)}"
 
@@ -730,12 +737,6 @@ linux-mod_src_install() {
 		srcdir=${srcdir:-${S}}
 		objdir=${objdir:-${srcdir}}
 
-		if check_module_signing; then
-			ebegin "Signing module ${modulename}"
-			"${KV_DIR}"/scripts/sign-file sha512 "${KERNEL_MODSECKEY}" "${KERNEL_MODPUBKEY}" "${objdir}/${modulename}.${KV_OBJ}"
-			eend $?
-		fi
-
 		einfo "Installing ${modulename} module"
 		cd "${objdir}" || die "${objdir} does not exist"
 		insinto /lib/modules/${KV_FULL}/${libdir}
@@ -748,13 +749,23 @@ linux-mod_src_install() {
 
 # @FUNCTION: linux-mod_pkg_preinst
 # @DESCRIPTION:
-# It checks what to do after having merged the package.
+# It checks what to do after having merged the package, and signs installed modules if necessary.
 linux-mod_pkg_preinst() {
 	debug-print-function ${FUNCNAME} $*
 	[ -n "${MODULES_OPTIONAL_USE}" ] && use !${MODULES_OPTIONAL_USE} && return
 
 	[ -d "${D}lib/modules" ] && UPDATE_DEPMOD=true || UPDATE_DEPMOD=false
 	[ -d "${D}lib/modules" ] && UPDATE_MODULEDB=true || UPDATE_MODULEDB=false
+
+	if [ -d "${D}lib/modules" ] && check_module_signing; then
+		find "${D}lib/modules" -name "*.${KV_OBJ}" -type f -print0 |
+		while read -r -d $'\0' o; do
+			ebegin "Signing $(basename "$o" ".${KV_OBJ}") module"
+			"${KV_DIR}"/scripts/sign-file sha512 "${KERNEL_MODSECKEY}" "${KERNEL_MODPUBKEY}" "$o"
+			eend $?
+		done
+	fi
+
 }
 
 # @FUNCTION: linux-mod_pkg_postinst
