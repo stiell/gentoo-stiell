@@ -581,6 +581,13 @@ linux-mod_pkg_setup() {
 
 	local is_bin="${MERGE_TYPE}"
 
+	if use module-signing; then
+		CONFIG_CHECK="${CONFIG_CHECK} MODULE_SIG CRYPTO_SHA512"
+	else
+		CONFIG_CHECK="${CONFIG_CHECK} !CONFIG_MODULE_SIG_FORCE"
+	fi
+	export CONFIG_CHECK
+
 	# If we are installing a binpkg, take a different path.
 	# use MERGE_TYPE if available (eapi>=4); else use non-PMS EMERGE_FROM (eapi<4)
 	if has ${EAPI} 0 1 2 3; then
@@ -590,12 +597,6 @@ linux-mod_pkg_setup() {
 	if [[ ${is_bin} == binary ]]; then
 		linux-mod_pkg_setup_binary
 		return
-	fi
-
-	if use module-signing; then
-		CONFIG_CHECK="${CONFIG_CHECK} MODULE_SIG CRYPTO_SHA512"
-	else
-		CONFIG_CHECK="${CONFIG_CHECK} !CONFIG_MODULE_SIG_FORCE"
 	fi
 
 	linux-info_pkg_setup;
